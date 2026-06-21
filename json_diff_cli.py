@@ -131,7 +131,31 @@ def main():
         help='静默模式，不在控制台输出'
     )
 
+    parser.add_argument(
+        '--summary-json',
+        metavar='OUTPUT',
+        help='将差异统计导出为 JSON 文件'
+    )
+
+    parser.add_argument(
+        '--fail-on',
+        metavar='TYPES',
+        default='',
+        help='指定触发非零返回码的变化类型，逗号分隔: added,removed,modified,type_changed。未指定时任意差异均返回 1'
+    )
+
     args = parser.parse_args()
+
+    valid_fail_types = {'added', 'removed', 'modified', 'type_changed'}
+    fail_on_types = set()
+    if args.fail_on:
+        for t in args.fail_on.split(','):
+            t = t.strip()
+            if t:
+                if t not in valid_fail_types:
+                    print(f'错误: --fail-on 无效类型 "{t}"，有效值: {",".join(sorted(valid_fail_types))}', file=sys.stderr)
+                    sys.exit(3)
+                fail_on_types.add(t)
 
     if not os.path.exists(args.file1):
         print(f'错误: 文件不存在 - {args.file1}', file=sys.stderr)
@@ -163,7 +187,36 @@ def main():
             if not args.quiet:
                 print(f'Markdown 报告已保存到: {args.markdown}')
 
-        sys.exit(0 if not result.has_changes else 1)
+        if args.summary_json:
+            summary_data = {
+                'added_count': len(result.added),
+                'removed_count': len(result.removed),
+                'modified_count': len(result.modified),
+                'type_changed_count': len(result.type_changed),
+                'total_changes': result.total_changes,
+                'has_changes': result.has_changes,
+                'old_file': args.file1,
+                'new_file': args.file2,
+                'ignore_rules': args.ignore
+            }
+            with open(args.summary_json, 'w', encoding='utf-8') as f:
+                json.dump(summary_data, f, ensure_ascii=False, indent=2)
+            if not args.quiet:
+                print(f'Summary JSON 已保存到: {args.summary_json}')
+
+        if fail_on_types:
+            should_fail = False
+            if 'added' in fail_on_types and result.added:
+                should_fail = True
+            if 'removed' in fail_on_types and result.removed:
+                should_fail = True
+            if 'modified' in fail_on_types and result.modified:
+                should_fail = True
+            if 'type_changed' in fail_on_types and result.type_changed:
+                should_fail = True
+            sys.exit(0 if not should_fail else 1)
+        else:
+            sys.exit(0 if not result.has_changes else 1)
 
     except json.JSONDecodeError as e:
         print(f'错误: JSON 解析失败 - {e}', file=sys.stderr)

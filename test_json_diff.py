@@ -395,6 +395,291 @@ def test_no_changes():
     return True
 
 
+def test_gitignore():
+    """测试 13: .gitignore 检查"""
+    print('=' * 60)
+    print('测试 13: .gitignore 检查')
+    print('=' * 60)
+
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    gitignore_path = os.path.join(project_root, '.gitignore')
+
+    assert os.path.exists(gitignore_path), '.gitignore 文件应该存在'
+
+    with open(gitignore_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    required_patterns = [
+        '__pycache__',
+        'test_output',
+        '.html',
+        '.md',
+        '.log',
+        '.tmp',
+    ]
+    for pattern in required_patterns:
+        assert pattern in content, f'.gitignore 应该包含: {pattern}'
+
+    print(f'.gitignore 存在: {gitignore_path}')
+    print(f'已校验关键规则: {", ".join(required_patterns)}')
+    print()
+    print('[OK] .gitignore 检查通过')
+    print()
+    return True
+
+
+def test_readme_content():
+    """测试 14: README 关键命令说明"""
+    print('=' * 60)
+    print('测试 14: README 关键命令说明')
+    print('=' * 60)
+
+    project_root = os.path.dirname(os.path.abspath(__file__))
+    readme_path = os.path.join(project_root, 'README.md')
+
+    assert os.path.exists(readme_path), 'README.md 文件应该存在'
+
+    with open(readme_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+
+    required_sections = [
+        '工具用途',
+        '运行环境',
+        '基础对比命令',
+        '忽略路径用法',
+        '排序开关',
+        'HTML 报告导出',
+        'Markdown 报告导出',
+        'Summary JSON 导出',
+        '返回码控制',
+        '返回码含义',
+        '数组对比说明',
+        '示例配置说明',
+        '测试命令',
+        '已知限制',
+        '--summary-json',
+        '--fail-on',
+    ]
+    for section in required_sections:
+        assert section in content, f'README 应该包含: {section}'
+
+    print(f'README 存在: {readme_path}')
+    print(f'已校验关键内容: {len(required_sections)} 项')
+    print()
+    print('[OK] README 关键内容检查通过')
+    print()
+    return True
+
+
+def test_cli_summary_json():
+    """测试 15: --summary-json 导出"""
+    print('=' * 60)
+    print('测试 15: --summary-json 导出')
+    print('=' * 60)
+
+    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'json_diff_cli.py')
+    file1 = os.path.join(EXAMPLES_DIR, 'basic', 'config_v1.json')
+    file2 = os.path.join(EXAMPLES_DIR, 'basic', 'config_v2.json')
+    summary_output = os.path.join(OUTPUT_DIR, 'basic_summary.json')
+
+    if os.path.exists(summary_output):
+        os.remove(summary_output)
+
+    result = subprocess.run(
+        [sys.executable, script_path, file1, file2,
+         '--summary-json', summary_output,
+         '-i', '*.password',
+         '--quiet'],
+        capture_output=True,
+        text=True,
+        encoding='utf-8'
+    )
+
+    assert os.path.exists(summary_output), 'Summary JSON 文件应该存在'
+    assert os.path.getsize(summary_output) > 0, 'Summary JSON 文件不应该为空'
+
+    with open(summary_output, 'r', encoding='utf-8') as f:
+        summary = json.load(f)
+
+    required_keys = [
+        'added_count', 'removed_count', 'modified_count',
+        'type_changed_count', 'total_changes', 'has_changes',
+        'old_file', 'new_file', 'ignore_rules'
+    ]
+    for key in required_keys:
+        assert key in summary, f'Summary JSON 应该包含字段: {key}'
+
+    assert summary['added_count'] >= 0, 'added_count 应该 >= 0'
+    assert summary['removed_count'] >= 0, 'removed_count 应该 >= 0'
+    assert summary['modified_count'] >= 0, 'modified_count 应该 >= 0'
+    assert summary['type_changed_count'] >= 0, 'type_changed_count 应该 >= 0'
+    assert summary['total_changes'] == (summary['added_count'] + summary['removed_count']
+                                        + summary['modified_count'] + summary['type_changed_count']), \
+        'total_changes 应该等于各分类之和'
+    assert isinstance(summary['has_changes'], bool), 'has_changes 应该是布尔值'
+    assert summary['has_changes'] is True, 'basic 示例应该存在差异'
+    assert file1 in summary['old_file'], 'old_file 应该包含输入路径'
+    assert file2 in summary['new_file'], 'new_file 应该包含输入路径'
+    assert isinstance(summary['ignore_rules'], list), 'ignore_rules 应该是列表'
+    assert '*.password' in summary['ignore_rules'], 'ignore_rules 应该包含传入的模式'
+
+    print(f'Summary JSON: {summary_output}')
+    print(f'  added_count: {summary["added_count"]}')
+    print(f'  removed_count: {summary["removed_count"]}')
+    print(f'  modified_count: {summary["modified_count"]}')
+    print(f'  type_changed_count: {summary["type_changed_count"]}')
+    print(f'  total_changes: {summary["total_changes"]}')
+    print(f'  has_changes: {summary["has_changes"]}')
+    print(f'  ignore_rules: {summary["ignore_rules"]}')
+    print()
+    print('[OK] --summary-json 导出测试通过')
+    print()
+    return True
+
+
+def test_cli_fail_on():
+    """测试 16: --fail-on 返回码控制"""
+    print('=' * 60)
+    print('测试 16: --fail-on 返回码控制')
+    print('=' * 60)
+
+    script_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'json_diff_cli.py')
+    file1 = os.path.join(EXAMPLES_DIR, 'basic', 'config_v1.json')
+    file2 = os.path.join(EXAMPLES_DIR, 'basic', 'config_v2.json')
+
+    result_default = subprocess.run(
+        [sys.executable, script_path, file1, file2, '--quiet'],
+        capture_output=True
+    )
+    print(f'默认（有差异）返回码: {result_default.returncode}')
+    assert result_default.returncode == 1, '默认有差异应该返回 1'
+
+    result_same = subprocess.run(
+        [sys.executable, script_path, file1, file1, '--quiet'],
+        capture_output=True
+    )
+    print(f'默认（无差异）返回码: {result_same.returncode}')
+    assert result_same.returncode == 0, '无差异应该返回 0'
+
+    file_only_added1 = os.path.join(OUTPUT_DIR, 'only_add_old.json')
+    file_only_added2 = os.path.join(OUTPUT_DIR, 'only_add_new.json')
+    with open(file_only_added1, 'w', encoding='utf-8') as f:
+        json.dump({'a': 1}, f)
+    with open(file_only_added2, 'w', encoding='utf-8') as f:
+        json.dump({'a': 1, 'b': 2}, f)
+
+    r_fail_added = subprocess.run(
+        [sys.executable, script_path, file_only_added1, file_only_added2,
+         '--fail-on', 'added', '--quiet'],
+        capture_output=True
+    )
+    print(f'仅有 added，--fail-on added: 返回码 {r_fail_added.returncode}')
+    assert r_fail_added.returncode == 1, '命中 added 应该返回 1'
+
+    r_fail_removed = subprocess.run(
+        [sys.executable, script_path, file_only_added1, file_only_added2,
+         '--fail-on', 'removed', '--quiet'],
+        capture_output=True
+    )
+    print(f'仅有 added，--fail-on removed: 返回码 {r_fail_removed.returncode}')
+    assert r_fail_removed.returncode == 0, '未命中 removed 应该返回 0'
+
+    file_only_mod_old = os.path.join(OUTPUT_DIR, 'only_mod_old.json')
+    file_only_mod_new = os.path.join(OUTPUT_DIR, 'only_mod_new.json')
+    with open(file_only_mod_old, 'w', encoding='utf-8') as f:
+        json.dump({'x': 'hello'}, f)
+    with open(file_only_mod_new, 'w', encoding='utf-8') as f:
+        json.dump({'x': 'world'}, f)
+
+    r_fail_added_mod = subprocess.run(
+        [sys.executable, script_path, file_only_mod_old, file_only_mod_new,
+         '--fail-on', 'added,removed', '--quiet'],
+        capture_output=True
+    )
+    print(f'仅有 modified，--fail-on added,removed: 返回码 {r_fail_added_mod.returncode}')
+    assert r_fail_added_mod.returncode == 0, '未命中类型应该返回 0'
+
+    file_type_old = os.path.join(OUTPUT_DIR, 'type_old.json')
+    file_type_new = os.path.join(OUTPUT_DIR, 'type_new.json')
+    with open(file_type_old, 'w', encoding='utf-8') as f:
+        json.dump({'val': '123'}, f)
+    with open(file_type_new, 'w', encoding='utf-8') as f:
+        json.dump({'val': 123}, f)
+
+    r_fail_type = subprocess.run(
+        [sys.executable, script_path, file_type_old, file_type_new,
+         '--fail-on', 'type_changed', '--quiet'],
+        capture_output=True
+    )
+    print(f'有 type_changed，--fail-on type_changed: 返回码 {r_fail_type.returncode}')
+    assert r_fail_type.returncode == 1, '命中 type_changed 应该返回 1'
+
+    r_invalid_type = subprocess.run(
+        [sys.executable, script_path, file1, file2,
+         '--fail-on', 'invalid_type', '--quiet'],
+        capture_output=True,
+        text=True,
+        encoding='utf-8'
+    )
+    print(f'无效类型返回码: {r_invalid_type.returncode}')
+    assert r_invalid_type.returncode == 3, '无效 --fail-on 类型应该返回 3'
+
+    print()
+    print('[OK] --fail-on 返回码控制测试通过')
+    print()
+    return True
+
+
+def test_array_path_in_reports():
+    """测试 17: 报告中数组路径展示及说明"""
+    print('=' * 60)
+    print('测试 17: 报告中数组路径展示及说明')
+    print('=' * 60)
+
+    file1 = os.path.join(EXAMPLES_DIR, 'arrays', 'config_v1.json')
+    file2 = os.path.join(EXAMPLES_DIR, 'arrays', 'config_v2.json')
+
+    comparator = JsonComparator(sort_paths=True)
+    result = comparator.compare_files(file1, file2)
+
+    md_report = MarkdownReport(result, file1, file2)
+    md_content = md_report.generate()
+
+    assert '数组对比说明' in md_content, 'Markdown 报告应该包含数组对比说明'
+    assert '索引格式' in md_content, 'Markdown 报告应该说明索引格式'
+    assert 'tags[0]' in md_content or 'servers[2].host' in md_content, \
+        'Markdown 报告应该包含索引格式示例'
+
+    array_paths = [item.path for item in result.all_items() if '[' in item.path]
+    for path in array_paths:
+        assert path in md_content, f'Markdown 报告应该包含数组路径: {path}'
+
+    html_report = HtmlReport(result, file1, file2)
+    html_content = html_report.generate()
+
+    assert 'array-note' in html_content, 'HTML 报告应该包含 array-note 样式块'
+    assert '数组对比说明' in html_content, 'HTML 报告应该包含数组对比说明文本'
+    assert '索引格式' in html_content, 'HTML 报告应该说明索引格式'
+
+    html_output = os.path.join(OUTPUT_DIR, 'array_note_report.html')
+    md_output = os.path.join(OUTPUT_DIR, 'array_note_report.md')
+    html_report.save(html_output)
+    md_report.save(md_output)
+
+    print(f'检测到的数组路径 ({len(array_paths)} 条):')
+    for p in array_paths[:6]:
+        print(f'  - {p}')
+    if len(array_paths) > 6:
+        print(f'  ... 共 {len(array_paths)} 条')
+    print(f'HTML 报告: {html_output}')
+    print(f'Markdown 报告: {md_output}')
+
+    print()
+    print('[OK] 数组路径展示及说明测试通过')
+    print()
+    return True
+
+
 def main():
     """运行所有测试"""
     print()
@@ -414,6 +699,11 @@ def main():
         ('CLI 报告导出', test_cli_reports),
         ('CLI 忽略参数', test_cli_ignore),
         ('无差异场景', test_no_changes),
+        ('.gitignore 检查', test_gitignore),
+        ('README 关键内容', test_readme_content),
+        ('--summary-json 导出', test_cli_summary_json),
+        ('--fail-on 返回码', test_cli_fail_on),
+        ('数组路径展示', test_array_path_in_reports),
     ]
 
     passed = 0

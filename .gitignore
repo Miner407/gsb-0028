@@ -1,0 +1,58 @@
+# Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 分发和打包
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.venv/
+
+# IDE / 编辑器
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# 测试输出目录
+test_output/
+
+# 导出的报告文件（项目根目录下）
+*.html
+*.md
+!README.md
+!题目.md
+
+# 导出的 Summary JSON
+*_summary.json
+
+# 日志文件
+*.log
+logs/
+
+# 临时缓存
+*.tmp
+*.temp
+.cache/
+.tmp/

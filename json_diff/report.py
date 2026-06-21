@@ -42,6 +42,9 @@ class MarkdownReport(BaseReport):
                 lines.append(f'- **新配置**: `{self.file2}`')
             lines.append('')
 
+        lines.append('> **数组对比说明**：数组路径采用**索引格式**（从 0 开始），例如 `tags[0]`、`servers[2].host`。按索引位置逐一对比，不根据对象 id/name 等字段做智能匹配。')
+        lines.append('')
+
         lines.append('## 统计摘要')
         lines.append('')
         lines.append(f'- 新增: **{len(self.result.added)}** 项')
@@ -254,6 +257,22 @@ pre {
     color: #2e7d32;
 }
 .section { margin-bottom: 30px; }
+.array-note {
+    background: #fff8e1;
+    border-left: 4px solid #ffa000;
+    padding: 12px 16px;
+    border-radius: 4px;
+    margin: 15px 0 20px;
+    font-size: 14px;
+    color: #5d4037;
+}
+.array-note code {
+    background: #fff3e0;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 12px;
+}
 </style>
 </head>
 <body>
@@ -269,6 +288,10 @@ pre {
             if self.file2:
                 html += f'<p><strong>新配置:</strong> <code>{self.file2}</code></p>'
             html += '</div>'
+
+        html += '''<div class="array-note">
+<strong>数组对比说明：</strong>数组路径采用<strong>索引格式</strong>（从 0 开始），例如 <code>tags[0]</code>、<code>servers[2].host</code>。按索引位置逐一对比，不根据对象 id/name 等字段做智能匹配。
+</div>'''
 
         html += '<div class="summary">'
         html += f'''
