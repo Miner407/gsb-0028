@@ -1,0 +1,17 @@
+{
+  "app_name": "MyApp",
+  "version": "2.0.0",
+  "debug": true,
+  "port": 8080,
+  "database": {
+    "host": "db.example.com",
+    "port": 3306,
+    "user": "admin",
+    "password": "secret123",
+    "database": "mydb"
+  },
+  "features": ["auth", "logging", "cache", "metrics"],
+  "max_connections": 200,
+  "timeout": 30,
+  "api_key": "sk-123456"
+}

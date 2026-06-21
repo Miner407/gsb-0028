@@ -1,0 +1,30 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 9090,
+    "ssl": true
+  },
+  "database": {
+    "host": "db.prod.com",
+    "port": 5432,
+    "name": "appdb",
+    "username": "prod_admin",
+    "password": "prod_pass_789",
+    "pool_size": 50
+  },
+  "logging": {
+    "level": "warn",
+    "file": "/var/log/app.log",
+    "max_size": "500MB"
+  },
+  "cache": {
+    "enabled": true,
+    "ttl": 7200,
+    "max_items": 50000
+  },
+  "secrets": {
+    "api_key": "prod-secret-key-456",
+    "token": "prod-jwt-token-abc",
+    "encryption_key": "prod-aes-256-key"
+  }
+}

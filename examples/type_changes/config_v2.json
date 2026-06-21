@@ -1,0 +1,21 @@
+{
+  "string_field": 12345,
+  "number_field": "42",
+  "boolean_field": "true",
+  "null_field": "not_null_anymore",
+  "array_field": {"0": 1, "1": 2, "2": 3},
+  "object_field": "was_object_now_string",
+  "mixed": {
+    "value": 999,
+    "count": null,
+    "enabled": "yes"
+  },
+  "deep": {
+    "level1": {
+      "level2": {
+        "value": 9999,
+        "items": {"first": "a", "second": "b"}
+      }
+    }
+  }
+}

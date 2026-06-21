@@ -1,0 +1,30 @@
+{
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "ssl": false
+  },
+  "database": {
+    "host": "localhost",
+    "port": 5432,
+    "name": "appdb",
+    "username": "admin",
+    "password": "pass123",
+    "pool_size": 10
+  },
+  "logging": {
+    "level": "info",
+    "file": "/var/log/app.log",
+    "max_size": "100MB"
+  },
+  "cache": {
+    "enabled": true,
+    "ttl": 3600,
+    "max_items": 10000
+  },
+  "secrets": {
+    "api_key": "secret-key-123",
+    "token": "jwt-token-xyz",
+    "encryption_key": "aes-256-key"
+  }
+}

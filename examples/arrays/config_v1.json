@@ -1,0 +1,36 @@
+{
+  "project_name": "ArrayDemo",
+  "tags": ["python", "json", "diff"],
+  "servers": [
+    {
+      "name": "web-01",
+      "ip": "192.168.1.10",
+      "role": "web",
+      "status": "active"
+    },
+    {
+      "name": "db-01",
+      "ip": "192.168.1.20",
+      "role": "database",
+      "status": "active"
+    },
+    {
+      "name": "cache-01",
+      "ip": "192.168.1.30",
+      "role": "cache",
+      "status": "active"
+    }
+  ],
+  "ports": [80, 443, 8080],
+  "allowed_ips": [
+    "10.0.0.1",
+    "10.0.0.2",
+    "10.0.0.3"
+  ],
+  "nested": {
+    "items": [
+      {"id": 1, "value": "a"},
+      {"id": 2, "value": "b"}
+    ]
+  }
+}

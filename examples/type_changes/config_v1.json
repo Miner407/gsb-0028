@@ -1,0 +1,24 @@
+{
+  "string_field": "hello",
+  "number_field": 42,
+  "boolean_field": true,
+  "null_field": null,
+  "array_field": [1, 2, 3],
+  "object_field": {
+    "name": "test",
+    "value": 100
+  },
+  "mixed": {
+    "value": "string_value",
+    "count": 5,
+    "enabled": false
+  },
+  "deep": {
+    "level1": {
+      "level2": {
+        "value": "deep_value",
+        "items": ["a", "b"]
+      }
+    }
+  }
+}
